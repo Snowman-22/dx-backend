@@ -16,10 +16,10 @@ public class UserEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id", nullable = false)
-    private Long user_id;
+    private Long userId;
 
     @Column(name = "user_name", nullable = false)
-    private String user_name;
+    private String userName;
 
     @Column(name = "password", nullable = false)
     private String password;
@@ -35,17 +35,20 @@ public class UserEntity {
     private Gender gender;
 
     @Column(name = "birth_date")
-    private LocalDateTime birth_date;
+    private LocalDateTime birthDate;
 
     @Column(name = "terms_accepted", nullable = false)
     @Builder.Default
-    private Boolean terms_accepted = false;
+    private Boolean termsAccepted = false;
 
     @Column(name = "privacy_accepted", nullable = false)
     @Builder.Default
-    private Boolean privacy_accepted = false;
+    private Boolean privacyAccepted = false;
 
     @Column(name = "create_date", nullable = false)
-    private LocalDateTime create_date;
+    private LocalDateTime createDate;
 
+    public enum Gender {
+        M, F, O
+    }
 }

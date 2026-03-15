@@ -14,14 +14,14 @@ public class ZoneEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "zone_id", nullable = false)
-    private Long zone_id;
+    private Long zoneId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "blueprint_id", nullable = false)
     private BlueprintEntity blueprint;
 
     @Column(name = "zone_type", nullable = false)
-    private String zone_type;
+    private String zoneType;
 
     @Column(name = "width", nullable = false)
     private Float width;

@@ -18,7 +18,7 @@ public class CartEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "cart_id", nullable = false)
-    private Long cart_id;
+    private Long cartId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
@@ -33,8 +33,8 @@ public class CartEntity {
 
     @Column(name = "is_delete", nullable = false)
     @Builder.Default
-    private Boolean is_delete = false;
+    private Boolean isDelete = false;
 
     @Column(name = "create_date", nullable = false)
-    private LocalDateTime create_date;
+    private LocalDateTime createDate;
 }

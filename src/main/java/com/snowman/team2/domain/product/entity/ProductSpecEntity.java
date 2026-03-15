@@ -13,7 +13,7 @@ public class ProductSpecEntity {
 
     @Id
     @Column(name = "product_id", nullable = false)
-    private Long product_id;
+    private Long productId;
 
     @OneToOne(fetch = FetchType.LAZY)
     @MapsId

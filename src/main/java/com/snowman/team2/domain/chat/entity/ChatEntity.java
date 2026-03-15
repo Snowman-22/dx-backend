@@ -19,7 +19,7 @@ public class ChatEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "chat_id", nullable = false)
-    private Long chat_id;
+    private Long chatId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
@@ -27,22 +27,22 @@ public class ChatEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "starter_package_id", nullable = false)
-    private StarterPackageEntity starter_package;
+    private StarterPackageEntity starterPackage;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "blueprint_id")
     private BlueprintEntity blueprint;
 
     @Column(name = "chat_title")
-    private String chat_title;
+    private String chatTitle;
 
     @Column(name = "start_date", nullable = false)
-    private LocalDateTime start_date;
+    private LocalDateTime startDate;
 
     @Column(name = "end_date")
-    private LocalDateTime end_date;
+    private LocalDateTime endDate;
 
     @Column(name = "is_select_blueprint", nullable = false)
     @Builder.Default
-    private Boolean is_select_blueprint = false;
+    private Boolean isSelectBlueprint = false;
 }

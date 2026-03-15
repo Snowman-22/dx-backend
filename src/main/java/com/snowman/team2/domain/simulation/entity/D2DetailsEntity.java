@@ -15,29 +15,29 @@ public class D2DetailsEntity {
 
     @Id
     @Column(name = "d2_details_id", nullable = false)
-    private Long d2_details_id;
+    private Long d2DetailsId;
 
     @Id
     @Column(name = "layout_2d_id", nullable = false)
-    private Long layout_2d_id;
+    private Long layout2dId;
 
     @Id
     @Column(name = "product_id", nullable = false)
-    private Long product_id;
+    private Long productId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "layout_2d_id", insertable = false, updatable = false)
-    private D2SimulationEntity d2_simulation;
+    private D2SimulationEntity d2Simulation;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id", insertable = false, updatable = false)
     private ProductEntity product;
 
     @Column(name = "corr_x", nullable = false)
-    private Float corr_x;
+    private Float corrX;
 
     @Column(name = "corr_y", nullable = false)
-    private Float corr_y;
+    private Float corrY;
 
     @Column(name = "rotation")
     private Float rotation;

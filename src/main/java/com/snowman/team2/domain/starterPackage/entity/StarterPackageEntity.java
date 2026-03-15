@@ -14,12 +14,12 @@ public class StarterPackageEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "starter_package_id", nullable = false)
-    private Long starter_package_id;
+    private Long starterPackageId;
 
     @Column(name = "starter_package_name", nullable = false)
-    private String starter_package_name;
+    private String starterPackageName;
 
     @Column(name = "is_use", nullable = false)
     @Builder.Default
-    private Boolean is_use = true;
+    private Boolean isUse = true;
 }

@@ -14,11 +14,11 @@ public class SubscribePriceEntity {
 
     @Id
     @Column(name = "subscribe_id", nullable = false)
-    private Long subscribe_id;
+    private Long subscribeId;
 
     @Id
     @Column(name = "product_id", nullable = false)
-    private Long product_id;
+    private Long productId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id", insertable = false, updatable = false)
@@ -31,14 +31,14 @@ public class SubscribePriceEntity {
     private Float price;
 
     @Column(name = "contract_period_year")
-    private Integer contract_period_year;
+    private Integer contractPeriodYear;
 
     @Column(name = "mandatory_period_year")
-    private Integer mandatory_period_year;
+    private Integer mandatoryPeriodYear;
 
     @Column(name = "visit_service_type")
-    private String visit_service_type;
+    private String visitServiceType;
 
     @Column(name = "visit_cycle_month")
-    private Integer visit_cycle_month;
+    private Integer visitCycleMonth;
 }

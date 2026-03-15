@@ -15,7 +15,7 @@ public class BlueprintEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "blueprint_id", nullable = false)
-    private Long blueprint_id;
+    private Long blueprintId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
@@ -26,22 +26,22 @@ public class BlueprintEntity {
     private ZoneEntity zone;
 
     @Column(name = "blueprint_title", nullable = false)
-    private String blueprint_title;
+    private String blueprintTitle;
 
     @Column(name = "blueprint_image_url")
-    private String blueprint_image_url;
+    private String blueprintImageUrl;
 
     @Column(name = "description")
     private String description;
 
     @Column(name = "square_footage", nullable = false)
-    private Float square_footage;
+    private Float squareFootage;
 
     @Column(name = "area_n2")
-    private Float area_n2;
+    private Float areaN2;
 
     @Column(name = "ceiling_height")
-    private Float ceiling_height;
+    private Float ceilingHeight;
 
     @Column(name = "width")
     private Float width;
@@ -50,5 +50,5 @@ public class BlueprintEntity {
     private Float depth;
 
     @Column(name = "room_count")
-    private Integer room_count;
+    private Integer roomCount;
 }

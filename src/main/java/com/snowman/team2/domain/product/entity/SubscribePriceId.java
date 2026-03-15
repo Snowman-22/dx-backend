@@ -11,19 +11,19 @@ import java.util.Objects;
 @EqualsAndHashCode
 public class SubscribePriceId implements Serializable {
 
-    private Long subscribe_id;
-    private Long product_id;
+    private Long subscribeId;
+    private Long productId;
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         SubscribePriceId that = (SubscribePriceId) o;
-        return Objects.equals(subscribe_id, that.subscribe_id) && Objects.equals(product_id, that.product_id);
+        return Objects.equals(subscribeId, that.subscribeId) && Objects.equals(productId, that.productId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(subscribe_id, product_id);
+        return Objects.hash(subscribeId, productId);
     }
 }

@@ -15,7 +15,7 @@ public class RecommendationEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "recommendation_id", nullable = false)
-    private Long recommendation_id;
+    private Long recommendationId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "chat_id", nullable = false)
