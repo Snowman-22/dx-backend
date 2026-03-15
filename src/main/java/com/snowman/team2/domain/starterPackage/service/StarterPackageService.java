@@ -62,4 +62,24 @@ public class StarterPackageService {
         return guestSessionRepository.findById(guestSessionId)
                 .map(GuestSessionEntity::getStarterType);
     }
+
+    /**
+     * 스타터 패키지 사용자 조회 (비로그인). guestSessionId로 저장된 스타터 타입 + 추천 상품 목록 반환.
+     */
+    @Transactional(readOnly = true)
+    public Optional<StarterPackageResponseDTO> getByGuestSessionId(String guestSessionId) {
+        if (guestSessionId == null || guestSessionId.isBlank()) {
+            return Optional.empty();
+        }
+        return guestSessionRepository.findById(guestSessionId)
+                .map(GuestSessionEntity::getStarterType)
+                .flatMap(type ->
+                        starterPackageRepository.findByStarterPackageNameAndIsUseTrue(type)
+                                .map(pkg -> {
+                                    var items = starterPackageItemRepository
+                                            .findByStarterPackage_StarterPackageIdOrderByRankAsc(pkg.getStarterPackageId());
+                                    return StarterPackageResponseDTO.fromEntity(guestSessionId, type, items);
+                                })
+                );
+    }
 }

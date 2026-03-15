@@ -22,4 +22,12 @@ public class StarterPackageController {
         StarterPackageResponseDTO response = starterPackageService.getRecommendation(request);
         return ResponseEntity.ok(response);
     }
+
+    @GetMapping(params = "guestSessionId")
+    public ResponseEntity<StarterPackageResponseDTO> getByGuestSessionId(
+            @RequestParam String guestSessionId) {
+        return starterPackageService.getByGuestSessionId(guestSessionId)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
 }

@@ -8,5 +8,5 @@ import java.util.Optional;
 
 public interface StarterPackageRepository extends JpaRepository<StarterPackageEntity, Long> {
 
-    Optional<StarterPackageEntity> findByStarterPackageNameAndIsUseTrue(StarterPackageType starterPackageName);
+    Optional<StarterPackageEntity> findByStarterPackageNameAndIsUseTrue(StarterPackageType starterType);
 }
