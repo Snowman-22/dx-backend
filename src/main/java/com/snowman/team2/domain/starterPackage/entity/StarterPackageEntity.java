@@ -16,10 +16,11 @@ public class StarterPackageEntity {
     @Column(name = "starter_package_id", nullable = false)
     private Long starterPackageId;
 
-    @Column(name = "starter_package_name", nullable = false)
-    private String starterPackageName;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "starter_package_name")
+    private StarterPackageType starterPackageName;
 
-    @Column(name = "is_use", nullable = false)
+    @Column(name = "is_use")
     @Builder.Default
     private Boolean isUse = true;
 }
