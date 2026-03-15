@@ -5,10 +5,7 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 
-/**
- * 비로그인 사용자의 세션 정보.
- * 스타터 패키지 선택 후 회원가입 시, sessionId로 조회해 선택한 starter_type을 넘겨주기 위해 저장.
- */
+
 @Entity
 @Table(name = "guest_session")
 @Getter

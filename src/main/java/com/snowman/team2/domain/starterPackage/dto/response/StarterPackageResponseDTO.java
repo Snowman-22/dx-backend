@@ -1,4 +1,4 @@
-package com.snowman.team2.domain.starterPackage.dto;
+package com.snowman.team2.domain.starterPackage.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.snowman.team2.domain.starterPackage.entity.StarterPackageItemEntity;
@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class StarterPackageResponse {
+public class StarterPackageResponseDTO {
 
     @JsonProperty("guest_sessionId")
     private String guestSessionId;
@@ -21,18 +21,17 @@ public class StarterPackageResponse {
     private StarterPackageType starterType;
 
     @JsonProperty("items")
-    private List<StarterPackageItemResponse> items;
+    private List<StarterPackageItemResponseDTO> items;
 
-    /** guestSessionId + starterType + item 엔티티 목록으로 Response 생성 */
-    public static StarterPackageResponse fromEntity(
+    public static StarterPackageResponseDTO fromEntity(
             String guestSessionId,
             StarterPackageType starterType,
             List<StarterPackageItemEntity> items) {
-        List<StarterPackageItemResponse> itemResponses = items.stream()
-                .map(StarterPackageItemResponse::fromEntity)
+        List<StarterPackageItemResponseDTO> itemResponses = items.stream()
+                .map(StarterPackageItemResponseDTO::fromEntity)
                 .collect(Collectors.toList());
 
-        return StarterPackageResponse.builder()
+        return StarterPackageResponseDTO.builder()
                 .guestSessionId(guestSessionId)
                 .starterType(starterType)
                 .items(itemResponses)

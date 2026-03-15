@@ -1,7 +1,7 @@
 package com.snowman.team2.domain.starterPackage.service;
 
-import com.snowman.team2.domain.starterPackage.dto.StarterPackageRequest;
-import com.snowman.team2.domain.starterPackage.dto.StarterPackageResponse;
+import com.snowman.team2.domain.starterPackage.dto.request.StarterPackageRequestDTO;
+import com.snowman.team2.domain.starterPackage.dto.response.StarterPackageResponseDTO;
 import com.snowman.team2.domain.starterPackage.entity.GuestSessionEntity;
 import com.snowman.team2.domain.starterPackage.entity.StarterPackageEntity;
 import com.snowman.team2.domain.starterPackage.entity.StarterPackageItemEntity;
@@ -29,7 +29,7 @@ public class StarterPackageService {
      * 스타터 타입 선택 시: 서버가 guest_sessionId 발급 후 DB 저장, 해당 패키지 아이템 조회하여 응답.
      */
     @Transactional
-    public StarterPackageResponse getRecommendation(StarterPackageRequest request) {
+    public StarterPackageResponseDTO getRecommendation(StarterPackageRequestDTO request) {
         String guestSessionId = generateAndSaveGuestSession(request);
 
         StarterPackageEntity starterPackage = starterPackageRepository
@@ -39,11 +39,11 @@ public class StarterPackageService {
         List<StarterPackageItemEntity> items = starterPackageItemRepository
                 .findByStarterPackage_StarterPackageIdOrderByRankAsc(starterPackage.getStarterPackageId());
 
-        return StarterPackageResponse.fromEntity(guestSessionId, request.getStarterType(), items);
+        return StarterPackageResponseDTO.fromEntity(guestSessionId, request.getStarterType(), items);
     }
 
     /** 세션 ID 생성 후 DB 저장 (회원가입 시 조회용) */
-    private String generateAndSaveGuestSession(StarterPackageRequest request) {
+    private String generateAndSaveGuestSession(StarterPackageRequestDTO request) {
         String sessionId = "sess_" + UUID.randomUUID().toString().replace("-", "");
         GuestSessionEntity entity = request.toEntity(sessionId);
         guestSessionRepository.save(entity);

@@ -1,4 +1,4 @@
-package com.snowman.team2.domain.starterPackage.dto;
+package com.snowman.team2.domain.starterPackage.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.snowman.team2.domain.starterPackage.entity.StarterPackageItemEntity;
@@ -8,7 +8,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class StarterPackageItemResponse {
+public class StarterPackageItemResponseDTO {
 
     @JsonProperty("rank")
     private Integer rank;
@@ -25,14 +25,13 @@ public class StarterPackageItemResponse {
     @JsonProperty("price")
     private Long price;
 
-    /** StarterPackageItemEntity → DTO */
-    public static StarterPackageItemResponse fromEntity(StarterPackageItemEntity item) {
+    public static StarterPackageItemResponseDTO fromEntity(StarterPackageItemEntity item) {
         var product = item.getProduct();
         Long price = product.getDiscountPrice() != null
                 ? product.getDiscountPrice().longValue()
                 : (product.getOriginalPrice() != null ? product.getOriginalPrice().longValue() : 0L);
 
-        return StarterPackageItemResponse.builder()
+        return StarterPackageItemResponseDTO.builder()
                 .rank(item.getRank())
                 .productName(product.getProductName())
                 .productDescription(product.getProductDescription())
