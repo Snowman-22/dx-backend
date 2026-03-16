@@ -27,7 +27,7 @@ public class UserEntity {
     @Column(name = "phone")
     private String phone;
 
-    @Column(name = "email")
+    @Column(name = "email", unique = true)
     private String email;
 
     @Enumerated(EnumType.STRING)
@@ -35,7 +35,7 @@ public class UserEntity {
     private Gender gender;
 
     @Column(name = "birth_date")
-    private LocalDateTime birthDate;
+    private String birthDate; // YYMMDD (예: "990101")
 
     @Column(name = "terms_accepted", nullable = false)
     @Builder.Default
@@ -48,7 +48,10 @@ public class UserEntity {
     @Column(name = "create_date", nullable = false)
     private LocalDateTime createDate;
 
-    public enum Gender {
-        M, F, O
+    @PrePersist
+    protected void onCreate() {
+        if (createDate == null) {
+            createDate = LocalDateTime.now();
+        }
     }
 }
