@@ -40,12 +40,13 @@ public class AuthService {
             throw new BadRequestException(ErrorCode.INVALID_PARAMETER, "이용약관 및 개인정보처리방침 동의가 필요합니다.");
         }
 
+        String encodedPassword = passwordEncoder.encode(request.getPassword());
+        UserEntity user = request.toEntity(encodedPassword);
+        userRepository.save(user);
+
         GuestSessionEntity guestSession = guestSessionRepository.findById(request.getGuestSessionId())
                 .orElseThrow(() -> new BadRequestException(ErrorCode.INVALID_PARAMETER, "유효하지 않은 guest_sessionId 입니다."));
-
-        String encodedPassword = passwordEncoder.encode(request.getPassword());
-        UserEntity user = request.toEntity(encodedPassword, guestSession);
-        userRepository.save(user);
+        guestSession.assignUser(user);
     }
 
     @Transactional(readOnly = true)
