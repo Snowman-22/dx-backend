@@ -1,6 +1,6 @@
 package com.snowman.team2.domain.simulation.entity;
 
-import com.snowman.team2.domain.auth.entity.UserEntity;
+import com.snowman.team2.domain.starterPackage.entity.GuestSessionEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -18,8 +18,8 @@ public class D2SimulationEntity {
     private Long layout2dId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    private UserEntity user;
+    @JoinColumn(name = "guest_session_id", nullable = false)
+    private GuestSessionEntity guestSession;
 
     @Column(name = "layout_2d_img_url", nullable = false)
     private String layout2dImgUrl;

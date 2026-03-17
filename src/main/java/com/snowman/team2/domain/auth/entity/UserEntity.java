@@ -1,5 +1,6 @@
 package com.snowman.team2.domain.auth.entity;
 
+import com.snowman.team2.domain.starterPackage.entity.GuestSessionEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -47,6 +48,10 @@ public class UserEntity {
 
     @Column(name = "create_date", nullable = false)
     private LocalDateTime createDate;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "guest_session_id", nullable = false)
+    private GuestSessionEntity guestSession;
 
     @PrePersist
     protected void onCreate() {

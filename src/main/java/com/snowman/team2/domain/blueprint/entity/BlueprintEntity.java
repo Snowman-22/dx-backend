@@ -1,6 +1,6 @@
 package com.snowman.team2.domain.blueprint.entity;
 
-import com.snowman.team2.domain.auth.entity.UserEntity;
+import com.snowman.team2.domain.starterPackage.entity.GuestSessionEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -18,8 +18,8 @@ public class BlueprintEntity {
     private Long blueprintId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    private UserEntity user;
+    @JoinColumn(name = "guest_session_id", nullable = false)
+    private GuestSessionEntity guestSession;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "zone_id", nullable = false)

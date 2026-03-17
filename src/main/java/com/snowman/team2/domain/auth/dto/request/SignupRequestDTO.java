@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.snowman.team2.domain.auth.entity.Gender;
 import com.snowman.team2.domain.auth.entity.UserEntity;
+import com.snowman.team2.domain.starterPackage.entity.GuestSessionEntity;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -49,7 +50,7 @@ public class SignupRequestDTO {
     @JsonProperty("privacy_accepted")
     private Boolean privacyAccepted;
 
-    public UserEntity toEntity(String encodedPassword) {
+    public UserEntity toEntity(String encodedPassword, GuestSessionEntity guestSession) {
         return UserEntity.builder()
                 .userName(name)
                 .password(encodedPassword)
@@ -60,6 +61,7 @@ public class SignupRequestDTO {
                 .termsAccepted(termsAccepted != null && termsAccepted)
                 .privacyAccepted(privacyAccepted != null && privacyAccepted)
                 .createDate(LocalDateTime.now())
+                .guestSession(guestSession)
                 .build();
     }
 }
