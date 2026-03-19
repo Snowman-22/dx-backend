@@ -24,7 +24,7 @@ public class ChatService {
     @Transactional
     public PrestartChatResponseDTO prestartChat(Long starterPackageId) {
         StarterPackageEntity starterPackage = starterPackageRepository.findById(starterPackageId)
-                .orElseThrow(() -> new BadRequestException(ErrorCode.DATA_NOT_FOUND, "스타터 패키지를 찾을 수 없습니다."));
+                .orElseThrow(() -> new BadRequestException(ErrorCode.DATA_NOT_EXIST, "스타터 패키지를 찾을 수 없습니다."));
 
         if (starterPackage.getIsUse() != null && !starterPackage.getIsUse()) {
             throw new BadRequestException(ErrorCode.INVALID_PARAMETER, "사용할 수 없는 스타터 패키지입니다.");
@@ -53,7 +53,7 @@ public class ChatService {
             return;
         }
         ChatEntity chat = chatRepository.findById(chatId)
-                .orElseThrow(() -> new BadRequestException(ErrorCode.DATA_NOT_FOUND, "채팅을 찾을 수 없습니다."));
+                .orElseThrow(() -> new BadRequestException(ErrorCode.DATA_NOT_EXIST, "채팅을 찾을 수 없습니다."));
         chat.assignUser(user);
     }
 }
