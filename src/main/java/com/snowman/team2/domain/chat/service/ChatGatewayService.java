@@ -20,6 +20,7 @@ public class ChatGatewayService {
     public FastApiChatResponse sendToFastApi(ChatMessage msg) {
         FastApiChatRequest request = new FastApiChatRequest(
                 msg.convId(),
+                msg.stepCode(),
                 msg.assistantText(),
                 msg.userText()
         );

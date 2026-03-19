@@ -24,9 +24,9 @@ public class ChatStompController {
         FastApiChatResponse fastapiResp = chatGatewayService.sendToFastApi(message);
 
         ChatReply reply = new ChatReply(
-                fastapiResp.conv_id(),
-                fastapiResp.ai_response(),
-                fastapiResp.state()
+                message.convId(),
+                fastapiResp.data(),
+                fastapiResp.ai_response()
         );
 
         String destination = "/topic/chat/" + message.convId();
