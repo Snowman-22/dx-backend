@@ -21,6 +21,10 @@ public class RecommendationEntity {
     @JoinColumn(name = "chat_id", nullable = false)
     private ChatEntity chat;
 
+    @Column(name = "is_selected", nullable = false, columnDefinition = "boolean default false")
+    @Builder.Default
+    private Boolean isSelected = false;
+
     @Column(name = "reason")
     private String reason;
 

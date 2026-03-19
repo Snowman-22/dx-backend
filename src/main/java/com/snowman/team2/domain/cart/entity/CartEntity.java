@@ -37,4 +37,8 @@ public class CartEntity {
 
     @Column(name = "create_date", nullable = false)
     private LocalDateTime createDate;
+
+    public void markDeleted() {
+        this.isDelete = true;
+    }
 }
