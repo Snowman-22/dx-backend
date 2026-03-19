@@ -17,11 +17,6 @@ import java.time.LocalDateTime;
 @Builder
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class SignupRequestDTO {
-
-    @NotBlank(message = "guest_sessionId는 필수입니다")
-    @JsonProperty("guest_sessionId")
-    private String guestSessionId;
-
     @NotBlank(message = "password는 필수입니다")
     private String password;
 

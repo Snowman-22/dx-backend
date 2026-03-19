@@ -5,8 +5,6 @@ import com.snowman.team2.domain.auth.dto.request.SignupRequestDTO;
 import com.snowman.team2.domain.auth.dto.response.LoginResponseDTO;
 import com.snowman.team2.domain.auth.entity.UserEntity;
 import com.snowman.team2.domain.auth.repository.UserRepository;
-import com.snowman.team2.domain.starterPackage.entity.GuestSessionEntity;
-import com.snowman.team2.domain.starterPackage.repository.GuestSessionRepository;
 import com.snowman.team2.global.exception.ErrorCode;
 import com.snowman.team2.global.exception.exceptionType.BadRequestException;
 import com.snowman.team2.global.exception.exceptionType.UnauthorizedException;
@@ -28,7 +26,6 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final JwtTokenProvider jwtTokenProvider;
-    private final GuestSessionRepository guestSessionRepository;
 
     @Transactional
     public void signup(SignupRequestDTO request) {
@@ -43,10 +40,6 @@ public class AuthService {
         String encodedPassword = passwordEncoder.encode(request.getPassword());
         UserEntity user = request.toEntity(encodedPassword);
         userRepository.save(user);
-
-        GuestSessionEntity guestSession = guestSessionRepository.findById(request.getGuestSessionId())
-                .orElseThrow(() -> new BadRequestException(ErrorCode.INVALID_PARAMETER, "유효하지 않은 guest_sessionId 입니다."));
-        guestSession.assignUser(user);
     }
 
     @Transactional(readOnly = true)
