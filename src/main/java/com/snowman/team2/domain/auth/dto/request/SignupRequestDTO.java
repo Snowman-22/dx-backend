@@ -44,6 +44,9 @@ public class SignupRequestDTO {
     @JsonProperty("privacy_accepted")
     private Boolean privacyAccepted;
 
+    @JsonProperty("chat_id")
+    private Long chatId;
+
     public UserEntity toEntity(String encodedPassword) {
         return UserEntity.builder()
                 .userName(name)

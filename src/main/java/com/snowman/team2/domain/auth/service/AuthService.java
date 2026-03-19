@@ -5,6 +5,7 @@ import com.snowman.team2.domain.auth.dto.request.SignupRequestDTO;
 import com.snowman.team2.domain.auth.dto.response.LoginResponseDTO;
 import com.snowman.team2.domain.auth.entity.UserEntity;
 import com.snowman.team2.domain.auth.repository.UserRepository;
+import com.snowman.team2.domain.chat.service.ChatService;
 import com.snowman.team2.global.exception.ErrorCode;
 import com.snowman.team2.global.exception.exceptionType.BadRequestException;
 import com.snowman.team2.global.exception.exceptionType.UnauthorizedException;
@@ -26,6 +27,7 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final JwtTokenProvider jwtTokenProvider;
+    private final ChatService chatService;
 
     @Transactional
     public void signup(SignupRequestDTO request) {
@@ -40,6 +42,9 @@ public class AuthService {
         String encodedPassword = passwordEncoder.encode(request.getPassword());
         UserEntity user = request.toEntity(encodedPassword);
         userRepository.save(user);
+
+        // 스타터 선택 시점에 만들어둔 Chat에 user_id를 연결
+        chatService.attachUserToChat(request.getChatId(), user);
     }
 
     @Transactional(readOnly = true)

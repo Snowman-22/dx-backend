@@ -22,7 +22,7 @@ public class ChatEntity {
     private Long chatId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "user_id", nullable = true)
     private UserEntity user;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -45,4 +45,8 @@ public class ChatEntity {
     @Column(name = "is_select_blueprint", nullable = false)
     @Builder.Default
     private Boolean isSelectBlueprint = false;
+
+    public void assignUser(UserEntity user) {
+        this.user = user;
+    }
 }

@@ -45,6 +45,7 @@ public class SecurityConfig {
 
                         // 2. 비로그인 허용 기능
                         .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/api/chats/prestart").permitAll()
                         .requestMatchers("/api/starter-package/**").permitAll()
 
                         // 3. 그 외 모든 요청(POST, PUT, DELETE 등)은 로그인 필수
