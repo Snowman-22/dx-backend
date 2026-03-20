@@ -5,11 +5,13 @@ import com.snowman.team2.domain.cart.repository.CartRepository;
 import com.snowman.team2.global.exception.ErrorCode;
 import com.snowman.team2.global.exception.exceptionType.BadRequestException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class CartService {
 
     private final CartRepository cartRepository;
