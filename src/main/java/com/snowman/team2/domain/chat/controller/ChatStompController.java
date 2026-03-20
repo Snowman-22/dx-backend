@@ -11,11 +11,12 @@ import com.snowman.team2.domain.reco.service.RecommendationService;
 import com.snowman.team2.global.exception.exceptionType.BadRequestException;
 import com.snowman.team2.global.exception.exceptionType.UnauthorizedException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.messaging.handler.annotation.Header;
+import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.security.Principal;
 import java.util.Map;
@@ -33,10 +34,13 @@ public class ChatStompController {
      * 프론트에서 /app/chat.send 로 메시지를 보내면 처리.
      */
     @MessageMapping("/chat.send")
-    public void handleChat(ChatMessage message, Principal principal) {
-        // STOMP Principal 주입이 환경/설정에 따라 null로 들어올 수 있으므로,
-        // 인터셉터에서 주입한 SecurityContext의 Authentication을 기준으로 인증 여부를 판단합니다.
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    public void handleChat(
+            ChatMessage message,
+            @Header(SimpMessageHeaderAccessor.USER_HEADER) Authentication authentication,
+            Principal principal
+    ) {
+        // Principal 파라미터는 환경/세부 매핑에 따라 null일 수 있습니다.
+        // 대신 SimpMessageHeaderAccessor의 simpUser 헤더에서 Authentication을 읽습니다.
         if (authentication == null || !authentication.isAuthenticated()) {
             throw new UnauthorizedException(ErrorCode.UNAUTHORIZED, "로그인이 필요합니다.");
         }
