@@ -16,11 +16,11 @@ public class ProductEntity {
     @Column(name = "product_id", nullable = false)
     private Long productId;
 
+    @Column(name = "model_id", nullable = false)
+    private String modelId;
+
     @Column(name = "product_name", nullable = false)
     private String productName;
-
-    @Column(name = "product_description")
-    private String productDescription;
 
     @Column(name = "category")
     private String category;
