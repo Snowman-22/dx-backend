@@ -48,7 +48,17 @@ public class SecurityConfig {
                         .requestMatchers("/api/chats/prestart").permitAll()
                         .requestMatchers("/api/starter-package/**").permitAll()
 
-                        // 3. 그 외 모든 요청(POST, PUT, DELETE 등)은 로그인 필수
+                        // 3. 정적 리소스/테스트 HTML 허용
+                        .requestMatchers(
+                                "/",
+                                "/stomp-chat-test.html",
+                                "/**/*.html",
+                                "/**/*.js",
+                                "/**/*.css",
+                                "/webjars/**"
+                        ).permitAll()
+
+                        // 4. 그 외 모든 요청(POST, PUT, DELETE 등)은 로그인 필수
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider, customUserDetailsService), UsernamePasswordAuthenticationFilter.class);
