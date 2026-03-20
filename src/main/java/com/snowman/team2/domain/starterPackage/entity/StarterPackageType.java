@@ -1,6 +1,8 @@
 package com.snowman.team2.domain.starterPackage.entity;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.snowman.team2.global.exception.ErrorCode;
+import com.snowman.team2.global.exception.exceptionType.BadRequestException;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -22,7 +24,7 @@ public enum StarterPackageType {
     @JsonCreator
     public static StarterPackageType from(String value) {
         if (value == null) {
-            throw new IllegalArgumentException("starter_package_type is required");
+            throw new BadRequestException(ErrorCode.INVALID_PARAMETER, "starter_package_type을 입력해주세요.");
         }
 
         String normalized = value.trim();
@@ -35,6 +37,6 @@ public enum StarterPackageType {
             }
         }
 
-        throw new IllegalArgumentException("알 수 없는 starter_package_type: " + value);
+        throw new BadRequestException(ErrorCode.INVALID_PARAMETER, "알 수 없는 starter_package_type: " + value);
     }
 }
