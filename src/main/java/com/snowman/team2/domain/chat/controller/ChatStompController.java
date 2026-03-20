@@ -4,6 +4,8 @@ import com.snowman.team2.domain.chat.dto.ChatMessage;
 import com.snowman.team2.domain.chat.dto.ChatReply;
 import com.snowman.team2.domain.chat.dto.FastApiChatResponse;
 import com.snowman.team2.domain.chat.service.ChatGatewayService;
+import com.snowman.team2.domain.chat.repository.ChatRepository;
+import com.snowman.team2.domain.chat.entity.ChatEntity;
 import com.snowman.team2.global.exception.ErrorCode;
 import com.snowman.team2.domain.reco.service.RecommendationService;
 import com.snowman.team2.global.exception.exceptionType.BadRequestException;
@@ -22,6 +24,7 @@ public class ChatStompController {
 
     private final ChatGatewayService chatGatewayService;
     private final RecommendationService recommendationService;
+    private final ChatRepository chatRepository;
     private final SimpMessagingTemplate messagingTemplate;
 
     /**
@@ -32,16 +35,13 @@ public class ChatStompController {
         if (principal == null) {
             throw new UnauthorizedException(ErrorCode.UNAUTHORIZED, "로그인이 필요합니다.");
         }
-        Long chatId;
-        try {
-            chatId = Long.valueOf(message.convId());
-        } catch (NumberFormatException e) {
-            throw new BadRequestException(ErrorCode.INVALID_PARAMETER, "유효하지 않은 chat id 입니다.");
-        }
+        String chatConvId = message.convId();
+        ChatEntity chat = chatRepository.findByChatConvId(chatConvId)
+                .orElseThrow(() -> new BadRequestException(ErrorCode.DATA_NOT_EXIST, "채팅을 찾을 수 없습니다."));
 
         FastApiChatResponse fastapiResp = chatGatewayService.sendToFastApi(message);
         Map<String, Object> dataWithRecommendationIds =
-                recommendationService.saveAndAttachRecommendationIds(chatId, fastapiResp.data());
+                recommendationService.saveAndAttachRecommendationIds(chat.getChatId(), chatConvId, fastapiResp.data());
 
         ChatReply reply = new ChatReply(
                 message.convId(),

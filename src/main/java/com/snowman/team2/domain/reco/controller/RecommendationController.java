@@ -21,7 +21,7 @@ public class RecommendationController {
 
     @GetMapping("/{chatId}")
     public ResponseEntity<List<RecommendationDTO>> getRecommendations(
-            @PathVariable Long chatId,
+            @PathVariable String chatId,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
         return ResponseEntity.ok(recommendationService.getRecommendations(chatId, userDetails.getUserId()));
@@ -34,7 +34,7 @@ public class RecommendationController {
      */
     @PostMapping("/{chatId}/select")
     public ResponseEntity<Void> selectRecommendation(
-            @PathVariable Long chatId,
+            @PathVariable String chatId,
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @Valid @RequestBody SelectRecommendationRequestDTO request
     ) {
