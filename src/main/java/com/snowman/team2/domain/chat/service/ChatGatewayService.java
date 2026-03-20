@@ -25,7 +25,8 @@ public class ChatGatewayService {
                 msg.userText()
         );
 
-        String url = fastApiBaseUrl + "/chat/next";
+        // FastAPI/LangGraph 엔드포인트: POST /ai/chat
+        String url = fastApiBaseUrl + "/ai/chat";
         return restTemplate.postForObject(url, request, FastApiChatResponse.class);
     }
 }
