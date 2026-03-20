@@ -16,6 +16,7 @@ import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
+import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
@@ -67,6 +68,9 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         public Message<?> preSend(Message<?> message, MessageChannel channel) {
             StompHeaderAccessor accessor = StompHeaderAccessor.wrap(message);
             StompCommand command = accessor.getCommand();
+
+            // 디버깅용: 인터셉터가 실제로 호출되는지 최우선 확인
+            log.error("STOMP interceptor preSend hit. command={}", command);
             if (command == null) {
                 return message;
             }
@@ -78,7 +82,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                     authorization = accessor.getFirstNativeHeader("authorization");
                 }
 
-                log.info("STOMP {} authHeaderPresent={}", command, authorization != null && !authorization.isBlank());
+                log.warn("STOMP {} authHeaderPresent={}", command, authorization != null && !authorization.isBlank());
 
                 if (authorization == null || authorization.isBlank()) {
                     // CONNECT부터 토큰이 없으면 인증 불가
@@ -98,7 +102,11 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                 SecurityContextHolder.getContext().setAuthentication(authentication);
                 accessor.setUser(authentication);
 
-                log.info("STOMP {} authInjected={}", command, accessor.getUser() != null);
+                // STOMP 메서드(@MessageMapping)에서 Principal 주입에 쓰이는 simpUser를 명시적으로 세팅
+                SimpMessageHeaderAccessor simpAccessor = SimpMessageHeaderAccessor.wrap(message);
+                simpAccessor.setUser(authentication);
+
+                log.warn("STOMP {} authInjected={}", command, accessor.getUser() != null);
             }
 
             return message;
