@@ -5,6 +5,7 @@ import com.snowman.team2.domain.chat.dto.PrestartChatResponseDTO;
 import com.snowman.team2.domain.chat.entity.ChatEntity;
 import com.snowman.team2.domain.chat.repository.ChatRepository;
 import com.snowman.team2.domain.starterPackage.entity.StarterPackageEntity;
+import com.snowman.team2.domain.starterPackage.entity.StarterPackageType;
 import com.snowman.team2.domain.starterPackage.repository.StarterPackageRepository;
 import com.snowman.team2.global.exception.ErrorCode;
 import com.snowman.team2.global.exception.exceptionType.BadRequestException;
@@ -22,8 +23,9 @@ public class ChatService {
     private final StarterPackageRepository starterPackageRepository;
 
     @Transactional
-    public PrestartChatResponseDTO prestartChat(Long starterPackageId) {
-        StarterPackageEntity starterPackage = starterPackageRepository.findById(starterPackageId)
+    public PrestartChatResponseDTO prestartChat(StarterPackageType starterPackageType) {
+        StarterPackageEntity starterPackage = starterPackageRepository
+                .findByStarterPackageNameAndIsUseTrue(starterPackageType)
                 .orElseThrow(() -> new BadRequestException(ErrorCode.DATA_NOT_EXIST, "스타터 패키지를 찾을 수 없습니다."));
 
         if (starterPackage.getIsUse() != null && !starterPackage.getIsUse()) {
@@ -41,7 +43,7 @@ public class ChatService {
 
         return PrestartChatResponseDTO.builder()
                 .chatId(saved.getChatId())
-                .starterPackageId(starterPackageId)
+                .starterPackageId(starterPackage.getStarterPackageId())
                 .userId(null)
                 .message("채팅이 생성되었습니다. 회원가입/로그인 후 이어서 진행하세요.")
                 .build();

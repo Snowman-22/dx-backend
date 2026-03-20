@@ -23,7 +23,7 @@ public class ChatController {
     public ResponseEntity<PrestartChatResponseDTO> prestartChat(
             @Valid @RequestBody PrestartChatRequestDTO request
     ) {
-        return ResponseEntity.ok(chatService.prestartChat(request.starterPackageId()));
+        return ResponseEntity.ok(chatService.prestartChat(request.starterPackageType()));
     }
 }
 
