@@ -71,7 +71,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
             StompCommand command = stompAccessor.getCommand();
 
             // 디버깅용: 인터셉터가 실제로 호출되는지 최우선 확인
-            log.error("STOMP interceptor preSend hit. command={}", command);
+            log.warn("STOMP interceptor preSend hit. command={}", command);
             if (command == null) {
                 return message;
             }
@@ -106,8 +106,16 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                 // @MessageMapping 메서드의 Principal 주입이 필요하면 simpUser에도 세팅합니다.
                 SimpMessageHeaderAccessor simpAccessor = SimpMessageHeaderAccessor.wrap(message);
                 simpAccessor.setUser(authentication);
+                // 아래는 handler @Header(SimpMessageHeaderAccessor.USER_HEADER)로 받을 때
+                // 실제로 simpUser 헤더가 존재해야 하므로 헤더맵에도 명시적으로 주입합니다.
+                message.getHeaders().put(SimpMessageHeaderAccessor.USER_HEADER, authentication);
 
-                log.warn("STOMP {} authInjected={}", command, simpAccessor.getUser() != null);
+                log.warn(
+                        "STOMP {} authInjected={} simpUserHeaderPresent={}",
+                        command,
+                        simpAccessor.getUser() != null,
+                        message.getHeaders().containsKey(SimpMessageHeaderAccessor.USER_HEADER)
+                );
             }
 
             return message;
