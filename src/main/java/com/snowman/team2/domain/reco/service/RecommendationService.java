@@ -20,6 +20,7 @@ import com.snowman.team2.global.exception.ErrorCode;
 import com.snowman.team2.global.exception.exceptionType.BadRequestException;
 import com.snowman.team2.global.exception.exceptionType.UnauthorizedException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,6 +34,7 @@ import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class RecommendationService {
 
     private final RecommendationRepository recommendationRepository;

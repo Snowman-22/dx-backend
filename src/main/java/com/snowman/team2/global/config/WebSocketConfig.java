@@ -4,6 +4,7 @@ import com.snowman.team2.global.exception.ErrorCode;
 import com.snowman.team2.global.exception.exceptionType.UnauthorizedException;
 import com.snowman.team2.global.security.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.simp.config.ChannelRegistration;
@@ -25,6 +26,7 @@ import static org.springframework.messaging.simp.stomp.StompCommand.SUBSCRIBE;
 @Configuration
 @EnableWebSocketMessageBroker
 @RequiredArgsConstructor
+@Slf4j
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     private final JwtTokenProvider jwtTokenProvider;
@@ -76,6 +78,8 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                     authorization = accessor.getFirstNativeHeader("authorization");
                 }
 
+                log.info("STOMP {} authHeaderPresent={}", command, authorization != null && !authorization.isBlank());
+
                 if (authorization == null || authorization.isBlank()) {
                     // CONNECT부터 토큰이 없으면 인증 불가
                     throw new UnauthorizedException(ErrorCode.UNAUTHORIZED, "로그인이 필요합니다.");
@@ -93,6 +97,8 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                 Authentication authentication = jwtTokenProvider.getAuthentication(token);
                 SecurityContextHolder.getContext().setAuthentication(authentication);
                 accessor.setUser(authentication);
+
+                log.info("STOMP {} authInjected={}", command, accessor.getUser() != null);
             }
 
             return message;
