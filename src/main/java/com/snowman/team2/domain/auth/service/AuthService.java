@@ -42,9 +42,6 @@ public class AuthService {
         String encodedPassword = passwordEncoder.encode(request.getPassword());
         UserEntity user = request.toEntity(encodedPassword);
         userRepository.save(user);
-
-        // 스타터 선택 시점에 만들어둔 Chat에 user_id를 연결
-        chatService.attachUserToChat(request.getChatId(), user);
     }
 
     @Transactional(readOnly = true)

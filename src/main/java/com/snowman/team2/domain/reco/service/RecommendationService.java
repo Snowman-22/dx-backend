@@ -50,8 +50,8 @@ public class RecommendationService {
     }
 
     @Transactional(readOnly = true)
-    public List<RecommendationDTO> getRecommendations(Long chatId, Long userId) {
-        ChatEntity chat = chatRepository.findById(chatId)
+    public List<RecommendationDTO> getRecommendations(String chatId, Long userId) {
+        ChatEntity chat = chatRepository.findByChatConvId(chatId)
                 .orElseThrow(() -> new BadRequestException(ErrorCode.DATA_NOT_EXIST, "채팅을 찾을 수 없습니다."));
 
         checkChatOwner(chat, userId);
@@ -60,7 +60,7 @@ public class RecommendationService {
         return recs.stream()
                 .map(r -> new RecommendationDTO(
                         r.getRecommendationId(),
-                        chat.getChatId(),
+                        chat.getChatConvId(),
                         r.getReason(),
                         r.getProducts(),
                         r.getIsSelected()
@@ -72,14 +72,14 @@ public class RecommendationService {
      * 선택된 recommendation의 제품 목록을 사용자 cart에 담는다.
      */
     @Transactional
-    public void selectRecommendation(Long chatId, SelectRecommendationRequestDTO request, Long userId) {
-        ChatEntity chat = chatRepository.findById(chatId)
+    public void selectRecommendation(String chatId, SelectRecommendationRequestDTO request, Long userId) {
+        ChatEntity chat = chatRepository.findByChatConvId(chatId)
                 .orElseThrow(() -> new BadRequestException(ErrorCode.DATA_NOT_EXIST, "채팅을 찾을 수 없습니다."));
 
         checkChatOwner(chat, userId);
 
         RecommendationEntity recommendation = recommendationRepository
-                .findByChat_ChatIdAndRecommendationId(chatId, request.recommendationId())
+                .findByChat_ChatIdAndRecommendationId(chat.getChatId(), request.recommendationId())
                 .orElseThrow(() -> new BadRequestException(
                         ErrorCode.DATA_NOT_EXIST,
                         "지정한 recommendation이 해당 chat에 존재하지 않습니다."
@@ -120,7 +120,7 @@ public class RecommendationService {
     }
 
     @Transactional
-    public Map<String, Object> saveAndAttachRecommendationIds(Long chatId, Map<String, Object> fastApiData) {
+    public Map<String, Object> saveAndAttachRecommendationIds(Long chatId, String chatConvId, Map<String, Object> fastApiData) {
         if (fastApiData == null) {
             return Map.of();
         }
@@ -173,7 +173,7 @@ public class RecommendationService {
                     ? new LinkedHashMap<>(normalizedRecommendations.get(i))
                     : new LinkedHashMap<>();
             row.put("recommendation_id", savedEntity.getRecommendationId());
-            row.put("chat_id", chatId);
+            row.put("chat_uuid", chatConvId);
             row.put("is_selected", savedEntity.getIsSelected());
             withIds.add(row);
         }

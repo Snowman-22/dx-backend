@@ -6,8 +6,8 @@ public record RecommendationDTO(
         @JsonProperty("recommendation_id")
         Long recommendationId,
 
-        @JsonProperty("chat_id")
-        Long chatId,
+        @JsonProperty("chat_uuid")
+        String chatId,
 
         String reason,
 

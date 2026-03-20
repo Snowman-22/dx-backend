@@ -1,7 +1,9 @@
 package com.snowman.team2.domain.chat.service;
 
 import com.snowman.team2.domain.auth.entity.UserEntity;
+import com.snowman.team2.domain.auth.repository.UserRepository;
 import com.snowman.team2.domain.chat.dto.PrestartChatResponseDTO;
+import com.snowman.team2.domain.chat.dto.ChatEnterResponseDTO;
 import com.snowman.team2.domain.chat.entity.ChatEntity;
 import com.snowman.team2.domain.chat.repository.ChatRepository;
 import com.snowman.team2.domain.starterPackage.entity.StarterPackageEntity;
@@ -21,6 +23,7 @@ public class ChatService {
 
     private final ChatRepository chatRepository;
     private final StarterPackageRepository starterPackageRepository;
+    private final UserRepository userRepository;
 
     @Transactional
     public PrestartChatResponseDTO prestartChat(StarterPackageType starterPackageType) {
@@ -32,20 +35,8 @@ public class ChatService {
             throw new BadRequestException(ErrorCode.INVALID_PARAMETER, "사용할 수 없는 스타터 패키지입니다.");
         }
 
-        ChatEntity chat = ChatEntity.builder()
-                .user(null)
-                .starterPackage(starterPackage)
-                .startDate(LocalDateTime.now())
-                .isSelectBlueprint(false)
-                .build();
-
-        ChatEntity saved = chatRepository.save(chat);
-
         return PrestartChatResponseDTO.builder()
-                .chatId(saved.getChatId())
                 .starterPackageId(starterPackage.getStarterPackageId())
-                .userId(null)
-                .message("채팅이 생성되었습니다. 회원가입/로그인 후 이어서 진행하세요.")
                 .build();
     }
 
@@ -57,6 +48,47 @@ public class ChatService {
         ChatEntity chat = chatRepository.findById(chatId)
                 .orElseThrow(() -> new BadRequestException(ErrorCode.DATA_NOT_EXIST, "채팅을 찾을 수 없습니다."));
         chat.assignUser(user);
+    }
+
+    /**
+     * 채팅 시작 버튼에서만 chat_id를 발급한다.
+     */
+    @Transactional
+    public ChatEnterResponseDTO startChat(Long starterPackageId, Long userId) {
+        if (starterPackageId == null || userId == null) {
+            throw new BadRequestException(ErrorCode.INVALID_PARAMETER, "starter_package_id, user_id가 필요합니다.");
+        }
+
+        UserEntity user = userRepository.findById(userId)
+                .orElseThrow(() -> new BadRequestException(ErrorCode.DATA_NOT_EXIST, "사용자를 찾을 수 없습니다."));
+
+        StarterPackageEntity starterPackage = starterPackageRepository.findById(starterPackageId)
+                .orElseThrow(() -> new BadRequestException(ErrorCode.DATA_NOT_EXIST, "스타터 패키지를 찾을 수 없습니다."));
+
+        if (starterPackage.getIsUse() != null && !starterPackage.getIsUse()) {
+            throw new BadRequestException(ErrorCode.INVALID_PARAMETER, "사용할 수 없는 스타터 패키지입니다.");
+        }
+
+        String chatConvId = "chat_" + java.util.UUID.randomUUID();
+
+        ChatEntity chat = ChatEntity.builder()
+                .user(user)
+                .starterPackage(starterPackage)
+                .chatConvId(chatConvId)
+                .startDate(LocalDateTime.now())
+                .isSelectBlueprint(false)
+                .build();
+
+        ChatEntity saved = chatRepository.save(chat);
+
+        return new ChatEnterResponseDTO(
+                saved.getChatConvId(),
+                userId,
+                user.getUserName(),
+                starterPackage.getStarterPackageId(),
+                starterPackage.getStarterPackageName(),
+                starterPackage.getStarterPackageName().getDescription()
+        );
     }
 }
 

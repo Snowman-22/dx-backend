@@ -1,11 +1,15 @@
 package com.snowman.team2.domain.chat.controller;
 
+import com.snowman.team2.domain.chat.dto.ChatEnterResponseDTO;
+import com.snowman.team2.domain.chat.dto.ChatStartRequestDTO;
 import com.snowman.team2.domain.chat.dto.PrestartChatRequestDTO;
 import com.snowman.team2.domain.chat.dto.PrestartChatResponseDTO;
 import com.snowman.team2.domain.chat.service.ChatService;
+import com.snowman.team2.global.userDetails.CustomUserDetails;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -24,6 +28,18 @@ public class ChatController {
             @Valid @RequestBody PrestartChatRequestDTO request
     ) {
         return ResponseEntity.ok(chatService.prestartChat(request.starterPackageType()));
+    }
+
+    /**
+     * 로그인 후 채팅하기 버튼을 눌렀을 때,
+     * 해당 starter_package_id로 chat_id를 발급하고 user / starter package 정보를 프론트에 내려준다.
+     */
+    @PostMapping("/start")
+    public ResponseEntity<ChatEnterResponseDTO> startChat(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @Valid @RequestBody ChatStartRequestDTO request
+    ) {
+        return ResponseEntity.ok(chatService.startChat(request.starterPackageId(), userDetails.getUserId()));
     }
 }
 
