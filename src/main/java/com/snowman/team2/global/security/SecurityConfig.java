@@ -14,6 +14,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -47,16 +48,11 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/chats/prestart").permitAll()
                         .requestMatchers("/api/starter-package/**").permitAll()
+                        .requestMatchers("/ws", "/ws/**").permitAll()
 
                         // 3. 정적 리소스/테스트 HTML 허용
-                        .requestMatchers(
-                                "/",
-                                "/stomp-chat-test.html",
-                                "/**/*.html",
-                                "/**/*.js",
-                                "/**/*.css",
-                                "/webjars/**"
-                        ).permitAll()
+                        .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
+                        .requestMatchers("/", "/stomp-chat-test.html", "/webjars/**").permitAll()
 
                         // 4. 그 외 모든 요청(POST, PUT, DELETE 등)은 로그인 필수
                         .anyRequest().authenticated()
