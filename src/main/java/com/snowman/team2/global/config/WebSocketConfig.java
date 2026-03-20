@@ -9,13 +9,13 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.simp.config.ChannelRegistration;
 import org.springframework.messaging.simp.stomp.StompCommand;
-import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
 import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
+import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -66,8 +66,9 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
         @Override
         public Message<?> preSend(Message<?> message, MessageChannel channel) {
-            StompHeaderAccessor accessor = StompHeaderAccessor.wrap(message);
-            StompCommand command = accessor.getCommand();
+            // STOMP 명령은 StompHeaderAccessor에서 읽어야 합니다.
+            StompHeaderAccessor stompAccessor = StompHeaderAccessor.wrap(message);
+            StompCommand command = stompAccessor.getCommand();
 
             // 디버깅용: 인터셉터가 실제로 호출되는지 최우선 확인
             log.error("STOMP interceptor preSend hit. command={}", command);
@@ -77,9 +78,9 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
             // 인증이 필요한 프레임만 검사
             if (command == CONNECT || command == SUBSCRIBE || command == SEND) {
-                String authorization = accessor.getFirstNativeHeader("Authorization");
+                String authorization = stompAccessor.getFirstNativeHeader("Authorization");
                 if (authorization == null) {
-                    authorization = accessor.getFirstNativeHeader("authorization");
+                    authorization = stompAccessor.getFirstNativeHeader("authorization");
                 }
 
                 log.warn("STOMP {} authHeaderPresent={}", command, authorization != null && !authorization.isBlank());
@@ -100,13 +101,13 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
                 Authentication authentication = jwtTokenProvider.getAuthentication(token);
                 SecurityContextHolder.getContext().setAuthentication(authentication);
-                accessor.setUser(authentication);
+                stompAccessor.setUser(authentication);
 
-                // STOMP 메서드(@MessageMapping)에서 Principal 주입에 쓰이는 simpUser를 명시적으로 세팅
+                // @MessageMapping 메서드의 Principal 주입이 필요하면 simpUser에도 세팅합니다.
                 SimpMessageHeaderAccessor simpAccessor = SimpMessageHeaderAccessor.wrap(message);
                 simpAccessor.setUser(authentication);
 
-                log.warn("STOMP {} authInjected={}", command, accessor.getUser() != null);
+                log.warn("STOMP {} authInjected={}", command, simpAccessor.getUser() != null);
             }
 
             return message;

@@ -14,6 +14,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.security.Principal;
 import java.util.Map;
@@ -32,7 +34,10 @@ public class ChatStompController {
      */
     @MessageMapping("/chat.send")
     public void handleChat(ChatMessage message, Principal principal) {
-        if (principal == null) {
+        // STOMP Principal 주입이 환경/설정에 따라 null로 들어올 수 있으므로,
+        // 인터셉터에서 주입한 SecurityContext의 Authentication을 기준으로 인증 여부를 판단합니다.
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
             throw new UnauthorizedException(ErrorCode.UNAUTHORIZED, "로그인이 필요합니다.");
         }
         String chatConvId = message.convId();
