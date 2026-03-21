@@ -16,7 +16,6 @@ import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBr
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
-import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
@@ -76,8 +75,9 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                 return message;
             }
 
-            // 인증이 필요한 프레임만 검사
-            if (command == CONNECT || command == SUBSCRIBE || command == SEND) {
+            // STOMP은 CONNECT에서 인증을 세팅하고, 이후 메시지는 principal 파라미터에 의존하지 않습니다.
+            // (현재 채팅 컨트롤러는 Principal/Authentication 파라미터를 받지 않으므로 안정성을 위해 CONNECT만 검사)
+            if (command == CONNECT) {
                 String authorization = stompAccessor.getFirstNativeHeader("Authorization");
                 if (authorization == null) {
                     authorization = stompAccessor.getFirstNativeHeader("authorization");
@@ -86,7 +86,6 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                 log.warn("STOMP {} authHeaderPresent={}", command, authorization != null && !authorization.isBlank());
 
                 if (authorization == null || authorization.isBlank()) {
-                    // CONNECT부터 토큰이 없으면 인증 불가
                     throw new UnauthorizedException(ErrorCode.UNAUTHORIZED, "로그인이 필요합니다.");
                 }
 
@@ -103,19 +102,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                 SecurityContextHolder.getContext().setAuthentication(authentication);
                 stompAccessor.setUser(authentication);
 
-                // @MessageMapping 메서드의 Principal 주입이 필요하면 simpUser에도 세팅합니다.
-                SimpMessageHeaderAccessor simpAccessor = SimpMessageHeaderAccessor.wrap(message);
-                simpAccessor.setUser(authentication);
-                // 아래는 handler @Header(SimpMessageHeaderAccessor.USER_HEADER)로 받을 때
-                // 실제로 simpUser 헤더가 존재해야 하므로 헤더맵에도 명시적으로 주입합니다.
-                message.getHeaders().put(SimpMessageHeaderAccessor.USER_HEADER, authentication);
-
-                log.warn(
-                        "STOMP {} authInjected={} simpUserHeaderPresent={}",
-                        command,
-                        simpAccessor.getUser() != null,
-                        message.getHeaders().containsKey(SimpMessageHeaderAccessor.USER_HEADER)
-                );
+                log.warn("STOMP {} authInjected={}", command, authentication != null);
             }
 
             return message;
