@@ -32,13 +32,13 @@ public class ProductEntity {
     private String brand;
 
     @Column(name = "original_price")
-    private Float originalPrice;
+    private Long originalPrice;
 
     @Column(name = "discount_rate")
-    private Float discountRate;
+    private Integer discountRate;
 
     @Column(name = "discount_price")
-    private Float discountPrice;
+    private Long discountPrice;
 
     @Column(name = "is_subscribe")
     private Boolean isSubscribe;
