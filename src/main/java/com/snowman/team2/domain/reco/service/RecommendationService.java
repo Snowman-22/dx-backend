@@ -131,6 +131,9 @@ public class RecommendationService {
                 .orElseThrow(() -> new BadRequestException(ErrorCode.DATA_NOT_EXIST, "채팅을 찾을 수 없습니다."));
 
         Object recommendationsRaw = fastApiData.get("recommendations");
+        if (recommendationsRaw == null) {
+            recommendationsRaw = fastApiData.get("all_recommendations");
+        }
         if (!(recommendationsRaw instanceof List<?> recommendations)) {
             // 추천 리스트가 없는 응답은 그대로 전달
             return fastApiData;
@@ -182,6 +185,9 @@ public class RecommendationService {
 
         Map<String, Object> responseData = new LinkedHashMap<>(fastApiData);
         responseData.put("recommendations", withIds);
+        if (fastApiData.containsKey("all_recommendations")) {
+            responseData.put("all_recommendations", withIds);
+        }
         return responseData;
     }
 
