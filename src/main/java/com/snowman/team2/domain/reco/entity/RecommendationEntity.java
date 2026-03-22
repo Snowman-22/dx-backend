@@ -25,9 +25,9 @@ public class RecommendationEntity {
     @Builder.Default
     private Boolean isSelected = false;
 
-    @Column(name = "reason")
+    @Column(name = "reason", columnDefinition = "TEXT")
     private String reason;
 
-    @Column(name = "products")
-    private String products;  // JSON 또는 직렬화된 product ID 목록
+    @Column(name = "products", columnDefinition = "TEXT")
+    private String products;
 }
