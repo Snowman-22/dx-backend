@@ -4,6 +4,7 @@ import com.snowman.team2.domain.auth.entity.UserEntity;
 import com.snowman.team2.domain.auth.repository.UserRepository;
 import com.snowman.team2.domain.chat.dto.PrestartChatResponseDTO;
 import com.snowman.team2.domain.chat.dto.ChatEnterResponseDTO;
+import com.snowman.team2.domain.chat.dto.StarterPackageInfoResponseDTO;
 import com.snowman.team2.domain.chat.entity.ChatEntity;
 import com.snowman.team2.domain.chat.repository.ChatRepository;
 import com.snowman.team2.domain.starterPackage.entity.StarterPackageEntity;
@@ -11,11 +12,13 @@ import com.snowman.team2.domain.starterPackage.entity.StarterPackageType;
 import com.snowman.team2.domain.starterPackage.repository.StarterPackageRepository;
 import com.snowman.team2.global.exception.ErrorCode;
 import com.snowman.team2.global.exception.exceptionType.BadRequestException;
+import com.snowman.team2.global.exception.exceptionType.UnauthorizedException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -89,6 +92,36 @@ public class ChatService {
                 starterPackage.getStarterPackageName(),
                 starterPackage.getStarterPackageName().getDescription()
         );
+    }
+
+    /**
+     * 해당 대화(chat_conv_id)에 연결된 스타터 패키지 정보를 조회한다.
+     */
+    @Transactional(readOnly = true)
+    public StarterPackageInfoResponseDTO getStarterPackageForChat(String chatConvId, Long userId) {
+        ChatEntity chat = chatRepository.findByChatConvId(chatConvId)
+                .orElseThrow(() -> new BadRequestException(ErrorCode.DATA_NOT_EXIST, "채팅을 찾을 수 없습니다."));
+
+        assertChatOwnedByUser(chat, userId);
+
+        var starter = chat.getStarterPackage();
+        if (starter == null || starter.getStarterPackageName() == null) {
+            throw new BadRequestException(ErrorCode.DATA_NOT_EXIST, "스타터 패키지 정보를 찾을 수 없습니다.");
+        }
+
+        return new StarterPackageInfoResponseDTO(
+                starter.getStarterPackageId(),
+                starter.getStarterPackageName().name(),
+                starter.getStarterPackageName().getDescription()
+        );
+    }
+
+    private void assertChatOwnedByUser(ChatEntity chat, Long userId) {
+        if (chat.getUser() == null
+                || chat.getUser().getUserId() == null
+                || !Objects.equals(chat.getUser().getUserId(), userId)) {
+            throw new UnauthorizedException(ErrorCode.ACCESS_DENIED, "접근 권한이 없습니다.");
+        }
     }
 }
 
