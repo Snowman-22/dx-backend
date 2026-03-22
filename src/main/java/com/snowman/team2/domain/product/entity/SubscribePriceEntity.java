@@ -24,9 +24,6 @@ public class SubscribePriceEntity {
     @JoinColumn(name = "product_id", insertable = false, updatable = false)
     private ProductEntity product;
 
-    @Column(name = "month", nullable = false)
-    private Integer month;
-
     @Column(name = "price", nullable = false)
     private Float price;
 
