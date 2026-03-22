@@ -47,7 +47,7 @@ public class ChatStompController {
         ChatReply reply = new ChatReply(
                 message.convId(),
                 dataWithPresignedUrls,
-                fastapiResp.ai_response()
+                fastapiResp.aiResponse()
         );
 
         String destination = "/topic/chat/" + message.convId();
