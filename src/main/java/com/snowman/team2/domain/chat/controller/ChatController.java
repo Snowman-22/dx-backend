@@ -4,6 +4,7 @@ import com.snowman.team2.domain.chat.dto.ChatEnterResponseDTO;
 import com.snowman.team2.domain.chat.dto.ChatStartRequestDTO;
 import com.snowman.team2.domain.chat.dto.PrestartChatRequestDTO;
 import com.snowman.team2.domain.chat.dto.PrestartChatResponseDTO;
+import com.snowman.team2.domain.chat.dto.StarterPackageInfoResponseDTO;
 import com.snowman.team2.domain.chat.service.ChatService;
 import com.snowman.team2.global.userDetails.CustomUserDetails;
 import jakarta.validation.Valid;
@@ -40,6 +41,18 @@ public class ChatController {
             @Valid @RequestBody ChatStartRequestDTO request
     ) {
         return ResponseEntity.ok(chatService.startChat(request.starterPackageId(), userDetails.getUserId()));
+    }
+
+    /**
+     * 채팅에 연결된 스타터 패키지(선택했던 패키지) 정보 조회.
+     * path의 chatId는 chat_conv_id 문자열.
+     */
+    @GetMapping("/{chatId}/starter-package")
+    public ResponseEntity<StarterPackageInfoResponseDTO> getStarterPackage(
+            @PathVariable String chatId,
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        return ResponseEntity.ok(chatService.getStarterPackageForChat(chatId, userDetails.getUserId()));
     }
 }
 

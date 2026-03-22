@@ -14,6 +14,7 @@ import com.snowman.team2.domain.product.entity.ProductEntity;
 import com.snowman.team2.domain.product.repository.ProductRepository;
 import com.snowman.team2.domain.reco.dto.request.SelectRecommendationRequestDTO;
 import com.snowman.team2.domain.reco.dto.response.RecommendationDTO;
+import com.snowman.team2.domain.reco.dto.response.RecommendationsPageResponseDTO;
 import com.snowman.team2.domain.reco.entity.RecommendationEntity;
 import com.snowman.team2.domain.reco.repository.RecommendationRepository;
 import com.snowman.team2.global.exception.ErrorCode;
@@ -37,6 +38,9 @@ import java.util.Set;
 @Slf4j
 public class RecommendationService {
 
+    /** {@link #getRecommendationsPage(String, int, Long)} 한 페이지당 패키지 수 */
+    public static final int RECOMMENDATION_PAGE_SIZE = 3;
+
     private final RecommendationRepository recommendationRepository;
     private final ChatRepository chatRepository;
     private final UserRepository userRepository;
@@ -58,7 +62,8 @@ public class RecommendationService {
 
         checkChatOwner(chat, userId);
 
-        List<RecommendationEntity> recs = recommendationRepository.findAllByChat_ChatId(chat.getChatId());
+        List<RecommendationEntity> recs =
+                recommendationRepository.findAllByChat_ChatIdOrderByRecommendationIdAsc(chat.getChatId());
         return recs.stream()
                 .map(r -> new RecommendationDTO(
                         r.getRecommendationId(),
@@ -68,6 +73,50 @@ public class RecommendationService {
                         r.getIsSelected()
                 ))
                 .toList();
+    }
+
+    /**
+     * 추천 패키지를 페이지 단위(기본 3개)로 조회한다.
+     * 요청한 페이지에 더 이상 항목이 없으면 예외를 던진다. (빈 목록은 page=1일 때만)
+     * page는 1부터 시작 (1=첫 3개, 2=다음 3개, …).
+     */
+    @Transactional(readOnly = true)
+    public RecommendationsPageResponseDTO getRecommendationsPage(String chatId, int page, Long userId) {
+        if (page < 1) {
+            throw new BadRequestException(ErrorCode.INVALID_PARAMETER, "page는 1 이상이어야 합니다.");
+        }
+
+        ChatEntity chat = chatRepository.findByChatConvId(chatId)
+                .orElseThrow(() -> new BadRequestException(ErrorCode.DATA_NOT_EXIST, "채팅을 찾을 수 없습니다."));
+
+        checkChatOwner(chat, userId);
+
+        List<RecommendationEntity> all =
+                recommendationRepository.findAllByChat_ChatIdOrderByRecommendationIdAsc(chat.getChatId());
+        int total = all.size();
+        int size = RECOMMENDATION_PAGE_SIZE;
+        int start = (page - 1) * size;
+
+        if (total == 0 && page == 1) {
+            return new RecommendationsPageResponseDTO(List.of(), 1, size, 0, false);
+        }
+        if (start >= total) {
+            throw new BadRequestException(ErrorCode.DATA_NOT_EXIST, "더 이상 추천 패키지가 없습니다.");
+        }
+
+        int end = Math.min(start + size, total);
+        List<RecommendationDTO> slice = all.subList(start, end).stream()
+                .map(r -> new RecommendationDTO(
+                        r.getRecommendationId(),
+                        chat.getChatConvId(),
+                        r.getReason(),
+                        r.getProducts(),
+                        r.getIsSelected()
+                ))
+                .toList();
+
+        boolean hasNext = end < total;
+        return new RecommendationsPageResponseDTO(slice, page, size, total, hasNext);
     }
 
     /**

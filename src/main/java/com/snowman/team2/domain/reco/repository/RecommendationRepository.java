@@ -11,6 +11,8 @@ import java.util.List;
 public interface RecommendationRepository extends JpaRepository<RecommendationEntity, Long> {
 
     List<RecommendationEntity> findAllByChat_ChatId(Long chatId);
+
+    List<RecommendationEntity> findAllByChat_ChatIdOrderByRecommendationIdAsc(Long chatId);
     java.util.Optional<RecommendationEntity> findByChat_ChatIdAndRecommendationId(Long chatId, Long recommendationId);
     void deleteAllByChat_ChatId(Long chatId);
 
