@@ -9,6 +9,9 @@ public record RecommendationDTO(
         @JsonProperty("chat_uuid")
         String chatId,
 
+        @JsonProperty("package_name")
+        String packageName,
+
         String reason,
 
         String products,

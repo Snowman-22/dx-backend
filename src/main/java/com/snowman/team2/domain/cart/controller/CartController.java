@@ -1,5 +1,6 @@
 package com.snowman.team2.domain.cart.controller;
 
+import com.snowman.team2.domain.cart.dto.response.CartItemResponseDTO;
 import com.snowman.team2.domain.cart.service.CartService;
 import com.snowman.team2.domain.reco.dto.request.SelectRecommendationRequestDTO;
 import com.snowman.team2.domain.reco.service.RecommendationService;
@@ -9,11 +10,14 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -35,6 +39,30 @@ public class CartController {
     ) {
         recommendationService.selectRecommendation(chatId, request, userDetails.getUserId());
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/{chatId}")
+    public ResponseEntity<List<CartItemResponseDTO>> getCartItems(
+            @PathVariable String chatId,
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        return ResponseEntity.ok(cartService.getCartItems(chatId, userDetails.getUserId()));
+    }
+
+    /**
+     * 특정 recommendation(패키지)을 선택해서 담긴 cart 상품을 조회한다.
+     *
+     * @param chatId chat_conv_id 문자열
+     */
+    @GetMapping("/{chatId}/recommendations/{recommendationId}")
+    public ResponseEntity<List<CartItemResponseDTO>> getCartItemsBySelectedRecommendation(
+            @PathVariable String chatId,
+            @PathVariable Long recommendationId,
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        return ResponseEntity.ok(
+                cartService.getCartItemsBySelectedRecommendation(chatId, recommendationId, userDetails.getUserId())
+        );
     }
 
     @DeleteMapping("/{cartId}")
