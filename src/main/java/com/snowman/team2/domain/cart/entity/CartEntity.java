@@ -38,7 +38,19 @@ public class CartEntity {
     @Column(name = "create_date", nullable = false)
     private LocalDateTime createDate;
 
+    // 어떤 추천 패키지(recommendation)를 선택해서 담겼는지 추적용
+    @Column(name = "chat_conv_id")
+    private String chatConvId;
+
+    @Column(name = "recommendation_id")
+    private Long recommendationId;
+
     public void markDeleted() {
         this.isDelete = true;
+    }
+
+    public void assignRecommendationMeta(String chatConvId, Long recommendationId) {
+        this.chatConvId = chatConvId;
+        this.recommendationId = recommendationId;
     }
 }

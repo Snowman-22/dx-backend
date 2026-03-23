@@ -28,6 +28,9 @@ public class RecommendationEntity {
     @Column(name = "reason", columnDefinition = "TEXT")
     private String reason;
 
+    @Column(name = "package_name")
+    private String packageName;
+
     @Column(name = "products", columnDefinition = "TEXT")
     private String products;
 }

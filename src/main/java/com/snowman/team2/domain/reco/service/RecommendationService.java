@@ -27,8 +27,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.time.LocalDateTime;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -68,6 +68,7 @@ public class RecommendationService {
                 .map(r -> new RecommendationDTO(
                         r.getRecommendationId(),
                         chat.getChatConvId(),
+                        r.getPackageName(),
                         r.getReason(),
                         r.getProducts(),
                         r.getIsSelected()
@@ -109,6 +110,7 @@ public class RecommendationService {
                 .map(r -> new RecommendationDTO(
                         r.getRecommendationId(),
                         chat.getChatConvId(),
+                        r.getPackageName(),
                         r.getReason(),
                         r.getProducts(),
                         r.getIsSelected()
@@ -124,17 +126,7 @@ public class RecommendationService {
      */
     @Transactional
     public void selectRecommendation(String chatId, SelectRecommendationRequestDTO request, Long userId) {
-        ChatEntity chat = chatRepository.findByChatConvId(chatId)
-                .orElseThrow(() -> new BadRequestException(ErrorCode.DATA_NOT_EXIST, "채팅을 찾을 수 없습니다."));
-
-        checkChatOwner(chat, userId);
-
-        RecommendationEntity recommendation = recommendationRepository
-                .findByChat_ChatIdAndRecommendationId(chat.getChatId(), request.recommendationId())
-                .orElseThrow(() -> new BadRequestException(
-                        ErrorCode.DATA_NOT_EXIST,
-                        "지정한 recommendation이 해당 chat에 존재하지 않습니다."
-                ));
+        RecommendationEntity recommendation = chooseRecommendation(chatId, request, userId);
 
         UserEntity user = userRepository.findById(userId)
                 .orElseThrow(() -> new BadRequestException(ErrorCode.DATA_NOT_EXIST, "사용자를 찾을 수 없습니다."));
@@ -149,7 +141,12 @@ public class RecommendationService {
             if (productId == null) {
                 continue;
             }
-            if (cartRepository.existsByUser_UserIdAndProduct_ProductIdAndIsDeleteFalse(userId, productId)) {
+            var existingOpt = cartRepository.findByUser_UserIdAndChatConvIdAndProduct_ProductIdAndIsDeleteFalse(
+                    userId,
+                    chatId,
+                    productId
+            );
+            if (existingOpt.isPresent()) {
                 continue;
             }
             ProductEntity product = productRepository.findById(productId)
@@ -161,6 +158,7 @@ public class RecommendationService {
                     .quantity(1)
                     .isDelete(false)
                     .createDate(LocalDateTime.now())
+                    .chatConvId(chatId)
                     .build());
             addedCount++;
         }
@@ -168,6 +166,52 @@ public class RecommendationService {
         if (addedCount == 0) {
             throw new BadRequestException(ErrorCode.DATA_ALREADY_EXIST, "이미 선택하여 카트에 담긴 추천입니다.");
         }
+    }
+
+    /**
+     * 채팅 내 추천 패키지 하나를 선택 상태로 변경한다.
+     */
+    @Transactional
+    public RecommendationEntity chooseRecommendation(String chatId, SelectRecommendationRequestDTO request, Long userId) {
+        ChatEntity chat = chatRepository.findByChatConvId(chatId)
+                .orElseThrow(() -> new BadRequestException(ErrorCode.DATA_NOT_EXIST, "채팅을 찾을 수 없습니다."));
+
+        checkChatOwner(chat, userId);
+
+        RecommendationEntity recommendation = recommendationRepository
+                .findByChat_ChatIdAndRecommendationId(chat.getChatId(), request.recommendationId())
+                .orElseThrow(() -> new BadRequestException(
+                        ErrorCode.DATA_NOT_EXIST,
+                        "지정한 recommendation이 해당 chat에 존재하지 않습니다."
+                ));
+
+        recommendationRepository.resetSelectedByChatId(chat.getChatId());
+        recommendationRepository.selectByChatIdAndRecommendationId(chat.getChatId(), recommendation.getRecommendationId());
+
+        return recommendationRepository
+                .findByChat_ChatIdAndRecommendationId(chat.getChatId(), recommendation.getRecommendationId())
+                .orElseThrow(() -> new BadRequestException(ErrorCode.DATA_NOT_EXIST, "선택한 recommendation을 찾을 수 없습니다."));
+    }
+
+    @Transactional(readOnly = true)
+    public List<Long> getProductIdsForRecommendation(String chatId, Long recommendationId, Long userId) {
+        RecommendationEntity recommendation = getRecommendation(chatId, recommendationId, userId);
+        return extractProductIds(recommendation.getProducts());
+    }
+
+    @Transactional(readOnly = true)
+    public RecommendationEntity getRecommendation(String chatId, Long recommendationId, Long userId) {
+        ChatEntity chat = chatRepository.findByChatConvId(chatId)
+                .orElseThrow(() -> new BadRequestException(ErrorCode.DATA_NOT_EXIST, "채팅을 찾을 수 없습니다."));
+
+        checkChatOwner(chat, userId);
+
+        return recommendationRepository
+                .findByChat_ChatIdAndRecommendationId(chat.getChatId(), recommendationId)
+                .orElseThrow(() -> new BadRequestException(
+                        ErrorCode.DATA_NOT_EXIST,
+                        "지정한 recommendation이 해당 chat에 존재하지 않습니다."
+                ));
     }
 
     @Transactional
@@ -183,6 +227,9 @@ public class RecommendationService {
         if (recommendationsRaw == null) {
             recommendationsRaw = fastApiData.get("all_recommendations");
         }
+        if (recommendationsRaw == null) {
+            recommendationsRaw = fastApiData.get("recommendation_list");
+        }
         if (!(recommendationsRaw instanceof List<?> recommendations)) {
             // 추천 리스트가 없는 응답은 그대로 전달
             return fastApiData;
@@ -193,19 +240,35 @@ public class RecommendationService {
 
         List<RecommendationEntity> entitiesToSave = new ArrayList<>();
         List<Map<String, Object>> normalizedRecommendations = new ArrayList<>();
+        int maxRecommendationCount = 12;
         for (Object item : recommendations) {
+            if (entitiesToSave.size() >= maxRecommendationCount) {
+                break;
+            }
             if (!(item instanceof Map<?, ?> mapItem)) {
                 continue;
             }
 
-            String reason = toNullableString(mapItem.get("reason"));
+            String reason = toNullableString(firstNonNull(mapItem.get("reason"), mapItem.get("recommendationReason")));
+            String packageName = toNullableString(firstNonNull(mapItem.get("package_name"), mapItem.get("packageName")));
             Object productsObject = mapItem.get("products");
+            if (productsObject == null) {
+                Map<String, Object> groupedProducts = new LinkedHashMap<>();
+                if (mapItem.get("appliances") != null) {
+                    groupedProducts.put("appliances", mapItem.get("appliances"));
+                }
+                if (mapItem.get("furniture") != null) {
+                    groupedProducts.put("furniture", mapItem.get("furniture"));
+                }
+                productsObject = groupedProducts.isEmpty() ? null : groupedProducts;
+            }
             String products = toJsonString(productsObject);
 
             entitiesToSave.add(RecommendationEntity.builder()
                     .chat(chat)
                     .isSelected(false)
                     .reason(reason)
+                    .packageName(packageName)
                     .products(products)
                     .build());
 
@@ -237,7 +300,14 @@ public class RecommendationService {
         if (fastApiData.containsKey("all_recommendations")) {
             responseData.put("all_recommendations", withIds);
         }
+        if (fastApiData.containsKey("recommendation_list")) {
+            responseData.put("recommendation_list", withIds);
+        }
         return responseData;
+    }
+
+    private Object firstNonNull(Object first, Object second) {
+        return first != null ? first : second;
     }
 
     private String toNullableString(Object value) {
@@ -265,7 +335,7 @@ public class RecommendationService {
 
         try {
             JsonNode root = objectMapper.readTree(productsRaw);
-            Set<Long> productIds = new HashSet<>();
+            Set<Long> productIds = new LinkedHashSet<>();
             collectProductIds(root, productIds);
             return new ArrayList<>(productIds);
         } catch (JsonProcessingException ignored) {
@@ -315,4 +385,3 @@ public class RecommendationService {
         }
     }
 }
-
