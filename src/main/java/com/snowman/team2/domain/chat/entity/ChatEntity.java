@@ -1,7 +1,6 @@
 package com.snowman.team2.domain.chat.entity;
 
 import com.snowman.team2.domain.auth.entity.UserEntity;
-import com.snowman.team2.domain.blueprint.entity.BlueprintEntity;
 import com.snowman.team2.domain.starterPackage.entity.StarterPackageEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -32,10 +31,6 @@ public class ChatEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "starter_package_id", nullable = false)
     private StarterPackageEntity starterPackage;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "blueprint_id")
-    private BlueprintEntity blueprint;
 
     @Column(name = "chat_title")
     private String chatTitle;

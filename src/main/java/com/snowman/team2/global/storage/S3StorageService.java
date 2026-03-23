@@ -28,9 +28,9 @@ public class S3StorageService {
      * 프론트에 이미지로 보여줄 때는 {@link #presignedGetUrl(String)} 으로 잠깐 쓸 수 있는 URL을 만들어 내려줍니다.
      * <p>
      * {@link S3UploadPath#PRODUCT_IMAGE} → {@code ProductEntity#productImageUrl} (루트 키, 프리픽스 없음)<br>
-     * {@link S3UploadPath#BLUEPRINT_IMAGE} → {@code BlueprintEntity#blueprintImageUrl}<br>
-     * {@link S3UploadPath#LAYOUT_2D} → {@code D2SimulationEntity#layout2dImgUrl} (프론트 전달 파일 업로드)<br>
-     * {@link S3UploadPath#LAYOUT_3D} → {@code D3SimulationEntity#layout3dImgUrl} (프론트 전달 파일 업로드)
+     * {@link S3UploadPath#BLUEPRINT_IMAGE} → blueprint 이미지 키(이 프로젝트에서는 별도 엔티티에 매핑될 수 있음)<br>
+     * {@link S3UploadPath#LAYOUT_2D} → 2D 레이아웃 이미지 키(프론트 전달 파일 업로드)<br>
+     * {@link S3UploadPath#LAYOUT_3D} → 3D 레이아웃 이미지 키(프론트 전달 파일 업로드)
      */
     public String upload(S3UploadPath path, MultipartFile file) {
         String key = buildObjectKey(path.getPrefix(), file.getOriginalFilename());
