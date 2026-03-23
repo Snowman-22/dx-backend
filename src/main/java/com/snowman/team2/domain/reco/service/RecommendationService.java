@@ -354,27 +354,14 @@ public class RecommendationService {
             return;
         }
 
-        if (node.isIntegralNumber()) {
-            productIds.add(node.asLong());
-            return;
-        }
-
-        if (node.isTextual()) {
-            try {
-                productIds.add(Long.parseLong(node.asText()));
-            } catch (NumberFormatException ignored) {
-            }
-            return;
-        }
-
         if (node.isObject()) {
             JsonNode productIdNode = node.get("product_id");
-            if (productIdNode != null && productIdNode.isIntegralNumber()) {
-                productIds.add(productIdNode.asLong());
+            if (productIdNode != null) {
+                addProductIdIfValid(productIdNode, productIds);
             }
             JsonNode productIdCamel = node.get("productId");
-            if (productIdCamel != null && productIdCamel.isIntegralNumber()) {
-                productIds.add(productIdCamel.asLong());
+            if (productIdCamel != null) {
+                addProductIdIfValid(productIdCamel, productIds);
             }
             node.elements().forEachRemaining(child -> collectProductIds(child, productIds));
             return;
@@ -382,6 +369,22 @@ public class RecommendationService {
 
         if (node.isArray()) {
             node.forEach(child -> collectProductIds(child, productIds));
+        }
+    }
+
+    private void addProductIdIfValid(JsonNode productIdNode, Set<Long> productIds) {
+        if (productIdNode == null || productIdNode.isNull()) {
+            return;
+        }
+        if (productIdNode.isIntegralNumber()) {
+            productIds.add(productIdNode.asLong());
+            return;
+        }
+        if (productIdNode.isTextual()) {
+            try {
+                productIds.add(Long.parseLong(productIdNode.asText()));
+            } catch (NumberFormatException ignored) {
+            }
         }
     }
 }
