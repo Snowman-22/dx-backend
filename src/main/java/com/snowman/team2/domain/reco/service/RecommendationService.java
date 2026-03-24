@@ -141,9 +141,10 @@ public class RecommendationService {
             if (productId == null) {
                 continue;
             }
-            var existingOpt = cartRepository.findByUser_UserIdAndChatConvIdAndProduct_ProductIdAndIsDeleteFalse(
+            var existingOpt = cartRepository.findByUser_UserIdAndChatConvIdAndRecommendationIdAndProduct_ProductIdAndIsDeleteFalse(
                     userId,
                     chatId,
+                    recommendation.getRecommendationId(),
                     productId
             );
             if (existingOpt.isPresent()) {
@@ -159,6 +160,7 @@ public class RecommendationService {
                     .isDelete(false)
                     .createDate(LocalDateTime.now())
                     .chatConvId(chatId)
+                    .recommendationId(recommendation.getRecommendationId())
                     .build());
             addedCount++;
         }
