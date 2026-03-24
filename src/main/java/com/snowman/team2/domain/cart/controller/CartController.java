@@ -49,28 +49,13 @@ public class CartController {
         return ResponseEntity.ok(cartService.getCartItems(chatId, userDetails.getUserId()));
     }
 
-    /**
-     * 특정 recommendation(패키지)을 선택해서 담긴 cart 상품을 조회한다.
-     *
-     * @param chatId chat_conv_id 문자열
-     */
-    @GetMapping("/{chatId}/recommendations/{recommendationId}")
-    public ResponseEntity<List<CartItemResponseDTO>> getCartItemsBySelectedRecommendation(
+    @DeleteMapping("/{chatId}/recommendations/{recommendationId}")
+    public ResponseEntity<Void> deleteRecommendationCartItems(
             @PathVariable String chatId,
             @PathVariable Long recommendationId,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        return ResponseEntity.ok(
-                cartService.getCartItemsBySelectedRecommendation(chatId, recommendationId, userDetails.getUserId())
-        );
-    }
-
-    @DeleteMapping("/{cartId}")
-    public ResponseEntity<Void> deleteCartItem(
-            @PathVariable Long cartId,
-            @AuthenticationPrincipal CustomUserDetails userDetails
-    ) {
-        cartService.deleteCartItem(cartId, userDetails.getUserId());
+        cartService.deleteRecommendationCartItems(chatId, recommendationId, userDetails.getUserId());
         return ResponseEntity.ok().build();
     }
 }

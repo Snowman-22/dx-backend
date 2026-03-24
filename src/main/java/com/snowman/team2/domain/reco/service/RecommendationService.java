@@ -94,7 +94,8 @@ public class RecommendationService {
 
         List<RecommendationEntity> all =
                 recommendationRepository.findAllByChat_ChatIdOrderByRecommendationIdAsc(chat.getChatId());
-        int total = all.size();
+        List<RecommendationEntity> arranged = arrangeRecommendationsForPaging(all);
+        int total = arranged.size();
         int size = RECOMMENDATION_PAGE_SIZE;
         int start = (page - 1) * size;
 
@@ -106,7 +107,7 @@ public class RecommendationService {
         }
 
         int end = Math.min(start + size, total);
-        List<RecommendationDTO> slice = all.subList(start, end).stream()
+        List<RecommendationDTO> slice = arranged.subList(start, end).stream()
                 .map(r -> new RecommendationDTO(
                         r.getRecommendationId(),
                         chat.getChatConvId(),
@@ -119,6 +120,35 @@ public class RecommendationService {
 
         boolean hasNext = end < total;
         return new RecommendationsPageResponseDTO(slice, page, size, total, hasNext);
+    }
+
+    /**
+     * package_name별로 추천을 묶은 뒤, 각 그룹에서 1개씩 번갈아 꺼내도록 재배열한다.
+     * 이렇게 하면 한 페이지 안에 같은 package_name이 최대한 덜 겹치게 된다.
+     */
+    private List<RecommendationEntity> arrangeRecommendationsForPaging(List<RecommendationEntity> recommendations) {
+        Map<String, List<RecommendationEntity>> grouped = new LinkedHashMap<>();
+        for (RecommendationEntity recommendation : recommendations) {
+            String packageName = recommendation.getPackageName();
+            grouped.computeIfAbsent(packageName, key -> new ArrayList<>()).add(recommendation);
+        }
+
+        List<RecommendationEntity> arranged = new ArrayList<>(recommendations.size());
+        boolean added;
+        int roundIndex = 0;
+
+        do {
+            added = false;
+            for (List<RecommendationEntity> group : grouped.values()) {
+                if (roundIndex < group.size()) {
+                    arranged.add(group.get(roundIndex));
+                    added = true;
+                }
+            }
+            roundIndex++;
+        } while (added);
+
+        return arranged;
     }
 
     /**
@@ -141,9 +171,10 @@ public class RecommendationService {
             if (productId == null) {
                 continue;
             }
-            var existingOpt = cartRepository.findByUser_UserIdAndChatConvIdAndProduct_ProductIdAndIsDeleteFalse(
+            var existingOpt = cartRepository.findByUser_UserIdAndChatConvIdAndRecommendationIdAndProduct_ProductIdAndIsDeleteFalse(
                     userId,
                     chatId,
+                    recommendation.getRecommendationId(),
                     productId
             );
             if (existingOpt.isPresent()) {
@@ -159,6 +190,7 @@ public class RecommendationService {
                     .isDelete(false)
                     .createDate(LocalDateTime.now())
                     .chatConvId(chatId)
+                    .recommendationId(recommendation.getRecommendationId())
                     .build());
             addedCount++;
         }
