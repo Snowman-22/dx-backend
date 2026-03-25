@@ -2,6 +2,7 @@ package com.snowman.team2.domain.chat.controller;
 
 import com.snowman.team2.domain.chat.dto.ChatEnterResponseDTO;
 import com.snowman.team2.domain.chat.dto.ChatStartRequestDTO;
+import com.snowman.team2.domain.chat.dto.ConversationHistoryResponseDTO;
 import com.snowman.team2.domain.chat.dto.PrestartChatRequestDTO;
 import com.snowman.team2.domain.chat.dto.PrestartChatResponseDTO;
 import com.snowman.team2.domain.chat.dto.StarterPackageInfoResponseDTO;
@@ -12,6 +13,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
@@ -54,5 +57,19 @@ public class ChatController {
     ) {
         return ResponseEntity.ok(chatService.getStarterPackageForChat(chatId, userDetails.getUserId()));
     }
-}
 
+    @GetMapping("/{chatId}/history")
+    public ResponseEntity<ConversationHistoryResponseDTO> getConversationHistory(
+            @PathVariable String chatId,
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        return ResponseEntity.ok(chatService.getConversationHistory(chatId, userDetails.getUserId()));
+    }
+
+    @GetMapping("/product-specs/{modelId}")
+    public ResponseEntity<Map<String, Object>> getProductSpecDetails(
+            @PathVariable String modelId
+    ) {
+        return ResponseEntity.ok(chatService.getProductSpecDetails(modelId));
+    }
+}
