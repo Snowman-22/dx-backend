@@ -48,4 +48,8 @@ public class ChatEntity {
     public void assignUser(UserEntity user) {
         this.user = user;
     }
+
+    public void updateChatTitle(String chatTitle) {
+        this.chatTitle = chatTitle;
+    }
 }

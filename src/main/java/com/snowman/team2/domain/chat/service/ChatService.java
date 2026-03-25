@@ -4,6 +4,7 @@ import com.snowman.team2.domain.auth.entity.UserEntity;
 import com.snowman.team2.domain.auth.repository.UserRepository;
 import com.snowman.team2.domain.chat.dto.PrestartChatResponseDTO;
 import com.snowman.team2.domain.chat.dto.ChatEnterResponseDTO;
+import com.snowman.team2.domain.chat.dto.ConversationHistoryResponseDTO;
 import com.snowman.team2.domain.chat.dto.StarterPackageInfoResponseDTO;
 import com.snowman.team2.domain.chat.entity.ChatEntity;
 import com.snowman.team2.domain.chat.repository.ChatRepository;
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 import java.util.Objects;
 
 @Service
@@ -27,6 +29,7 @@ public class ChatService {
     private final ChatRepository chatRepository;
     private final StarterPackageRepository starterPackageRepository;
     private final UserRepository userRepository;
+    private final ConversationDynamoService conversationDynamoService;
 
     @Transactional
     public PrestartChatResponseDTO prestartChat(StarterPackageType starterPackageType) {
@@ -83,6 +86,7 @@ public class ChatService {
                 .build();
 
         ChatEntity saved = chatRepository.save(chat);
+        conversationDynamoService.initializeConversation(saved);
 
         return new ChatEnterResponseDTO(
                 saved.getChatConvId(),
@@ -116,6 +120,21 @@ public class ChatService {
         );
     }
 
+    @Transactional(readOnly = true)
+    public ConversationHistoryResponseDTO getConversationHistory(String chatConvId, Long userId) {
+        ChatEntity chat = chatRepository.findByChatConvId(chatConvId)
+                .orElseThrow(() -> new BadRequestException(ErrorCode.DATA_NOT_EXIST, "채팅을 찾을 수 없습니다."));
+
+        assertChatOwnedByUser(chat, userId);
+
+        return new ConversationHistoryResponseDTO(conversationDynamoService.getConversationByConvId(chatConvId));
+    }
+
+    @Transactional(readOnly = true)
+    public Map<String, Object> getProductSpecDetails(String modelId) {
+        return conversationDynamoService.getProductSpecDetailsByModelId(modelId);
+    }
+
     private void assertChatOwnedByUser(ChatEntity chat, Long userId) {
         if (chat.getUser() == null
                 || chat.getUser().getUserId() == null
@@ -124,4 +143,3 @@ public class ChatService {
         }
     }
 }
-

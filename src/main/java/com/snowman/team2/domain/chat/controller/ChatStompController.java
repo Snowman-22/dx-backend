@@ -4,6 +4,8 @@ import com.snowman.team2.domain.chat.dto.ChatMessage;
 import com.snowman.team2.domain.chat.dto.ChatReply;
 import com.snowman.team2.domain.chat.dto.FastApiChatResponse;
 import com.snowman.team2.domain.chat.service.ChatGatewayService;
+import com.snowman.team2.domain.chat.service.ChatTitleService;
+import com.snowman.team2.domain.chat.service.ConversationDynamoService;
 import com.snowman.team2.domain.chat.repository.ChatRepository;
 import com.snowman.team2.domain.chat.entity.ChatEntity;
 import com.snowman.team2.global.exception.ErrorCode;
@@ -25,6 +27,8 @@ import java.util.Map;
 public class ChatStompController {
 
     private final ChatGatewayService chatGatewayService;
+    private final ChatTitleService chatTitleService;
+    private final ConversationDynamoService conversationDynamoService;
     private final RecommendationService recommendationService;
     private final ChatRepository chatRepository;
     private final S3StorageService s3StorageService;
@@ -39,7 +43,10 @@ public class ChatStompController {
         ChatEntity chat = chatRepository.findByChatConvId(chatConvId)
                 .orElseThrow(() -> new BadRequestException(ErrorCode.DATA_NOT_EXIST, "채팅을 찾을 수 없습니다."));
 
+        chatTitleService.updateChatTitleIfAbsent(chat, message);
+        conversationDynamoService.appendUserMessage(chat, message);
         FastApiChatResponse fastapiResp = chatGatewayService.sendToFastApi(message);
+        conversationDynamoService.appendAssistantMessage(chat, fastapiResp);
         Map<String, Object> dataWithRecommendationIds =
                 recommendationService.saveAndAttachRecommendationIds(chat.getChatId(), chatConvId, fastapiResp.data());
         Map<String, Object> dataWithPresignedUrls = applyPresignedUrls(dataWithRecommendationIds);
@@ -121,4 +128,3 @@ public class ChatStompController {
                 || normalized.startsWith("data:"));
     }
 }
-
