@@ -33,7 +33,10 @@ public class ChatTitleService {
             "공간 플랜 추천",
             "홈스타일링 추천",
             "집 인테리어 제안",
-            "공간 연출 추천"
+            "공간 연출 추천",
+            "라이프 빌드업 추천",
+            "공간 핏(Fit) 추천",
+            "홈 플래닝 제안"
     );
 
     private final ChatRepository chatRepository;
@@ -79,11 +82,24 @@ public class ChatTitleService {
         String prefix = normalized.length() <= maxPrefixLength
                 ? normalized
                 : normalized.substring(0, maxPrefixLength).trim();
+        prefix = normalizeTitlePrefix(prefix);
 
         if (prefix.isBlank()) {
             return suffix;
         }
         return prefix + " " + suffix;
+    }
+
+    private String normalizeTitlePrefix(String prefix) {
+        if (prefix == null) {
+            return "";
+        }
+
+        String normalizedPrefix = prefix.trim();
+        if (normalizedPrefix.matches("\\d+")) {
+            return normalizedPrefix + "평";
+        }
+        return normalizedPrefix;
     }
 
     private String extractReadableText(Object userText) {
