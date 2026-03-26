@@ -70,6 +70,7 @@ public class RecommendationService {
                         chat.getChatConvId(),
                         r.getPackageName(),
                         r.getReason(),
+                        r.getRecommendationPlus(),
                         r.getProducts(),
                         r.getIsSelected()
                 ))
@@ -113,6 +114,7 @@ public class RecommendationService {
                         chat.getChatConvId(),
                         r.getPackageName(),
                         r.getReason(),
+                        r.getRecommendationPlus(),
                         r.getProducts(),
                         r.getIsSelected()
                 ))
@@ -283,6 +285,10 @@ public class RecommendationService {
 
             String reason = toNullableString(firstNonNull(mapItem.get("reason"), mapItem.get("recommendationReason")));
             String packageName = toNullableString(firstNonNull(mapItem.get("package_name"), mapItem.get("packageName")));
+            String recommendationPlus = toNullableString(firstNonNull(
+                    mapItem.get("recommendation_plus"),
+                    mapItem.get("recommendationPlus")
+            ));
             Object productsObject = mapItem.get("products");
             if (productsObject == null) {
                 Map<String, Object> groupedProducts = new LinkedHashMap<>();
@@ -301,6 +307,7 @@ public class RecommendationService {
                     .isSelected(false)
                     .reason(reason)
                     .packageName(packageName)
+                    .recommendationPlus(recommendationPlus)
                     .products(products)
                     .build());
 
@@ -324,6 +331,9 @@ public class RecommendationService {
             row.put("recommendation_id", savedEntity.getRecommendationId());
             row.put("chat_uuid", chatConvId);
             row.put("is_selected", savedEntity.getIsSelected());
+            if (savedEntity.getRecommendationPlus() != null && !row.containsKey("recommendation_plus")) {
+                row.put("recommendation_plus", savedEntity.getRecommendationPlus());
+            }
             withIds.add(row);
         }
 

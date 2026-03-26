@@ -14,10 +14,12 @@ public record RecommendationDTO(
 
         String reason,
 
+        @JsonProperty("recommendation_plus")
+        String recommendationPlus,
+
         String products,
 
         @JsonProperty("is_selected")
         Boolean isSelected
 ) {
 }
-
